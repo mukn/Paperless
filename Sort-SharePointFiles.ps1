@@ -12,7 +12,7 @@ created before the file is put into place.
 
 # Declare the standard variables. These assume that the script is run from a computer with the libraries 
 # synchronized.
-$SourcePath = "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)"
+$SourcePath = "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)\"
 $DestinationPath = "~\Noyes Air Conditioning\Service - Technicians"
 
 
@@ -57,16 +57,25 @@ ForEach ($f in $files) {
         if ($WorkNumber.Length -eq 10) {
             # Reports with 10-digit job numbers go directly to the associated job folder.
             if (Test-Path "$Path\Quoted projects\$WorkNumber*") {
-                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$WorkNumber*"
-                Write-Host "I moved $f.Name to $Path\Quoted projects\$WorkNumber."
+		$ProjectDirName = $(Get-Item -Path "$Path\Quoted projects\$WorkNumber*").Name
+                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$ProjectDirName"
+		Start-Sleep -Seconds 3
+		if (Test-Path "$Path\Quoted projects\$ProjectDirName\$f") {
+			Write-Host "I moved $f to $Path\Quoted projects\$WorkNumber."
+			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
+			}
                 }
             else {
                 # If no job folder exists create one and move the report.
                 $WorkDescription = $result.Description
                 New-Item -Type Directory -Path "$Path\Quoted projects\" -Name "$WorkNumber - $WorkDescription"
                 Write-Host "I created a new directory ($WorkNumber - $WorkDescription)"
+		Start-Sleep -Seconds 3
                 Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$WorkNumber*"
-                Write-Host "I moved $f.Name to $Path\Quoted projects\$WorkNumber."
+		if (Test-Path "$Path\Quoted projects\$ProjectDirName\$f") {
+			Write-Host "I moved $f to $Path\Quoted projects\$WorkNumber."
+			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
+			}
                 }
             }
         if ($WorkNumber.Length -eq 5) {
