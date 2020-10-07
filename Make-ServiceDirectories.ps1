@@ -8,6 +8,17 @@ Reviewed 26 May 2020.
 
 #>
 
+<## -- Reminders
+## This section should only be run when run manually rather than in an automated fashion.
+$UserResponse = Read-Host -Prompt "Is this running from the correct file path (y/n)?"
+if ($UserResponse -eq "n") {
+	$targetPath = Read-Host -Prompt "Input the desired file path."
+	Test-Path -Path $targetPath
+	Set-Location -Path $targetPath
+	}
+
+#>
+
 ## Functions
 # Remove-SpecialChars - https://stackoverflow.com/q/30778098
 function Remove-SpecialChars {
@@ -42,15 +53,16 @@ Function New-SharePointFolders {
 		$dir = "$name - $code"
 		If ($currentDirs -match $code) {
 			Write-Host "Match found in directory $dir."
-		}
-		Else {
+		} Else 
+		{
 			# Create directories
-			New-Item -Type Directory -Name $dir
-			New-Item -Type Directory -Name "Quoted projects" -Path $dir
-			New-Item -Type Directory -Name "Scheduled maintenance reports" -Path $dir
-			New-Item -Type Directory -Name "Service contract" -Path $dir
-			New-Item -Type Directory -Name "Work order reports" -Path $dir
-			New-Item -Type Directory -Name "Daily job site reports" -Path "$dir\Quoted projects"
+			New-Item -Type Directory -Name $dir | Out-Null
+			New-Item -Type Directory -Name "Quoted projects" -Path $dir | Out-Null
+			New-Item -Type Directory -Name "Scheduled maintenance reports" -Path $dir | Out-Null
+			New-Item -Type Directory -Name "Service contract" -Path $dir | Out-Null
+			New-Item -Type Directory -Name "Work order reports" -Path $dir | Out-Null
+			New-Item -Type Directory -Name "Daily job site reports" -Path "$dir\Quoted projects" | Out-Null
+			Write-Host "Directory tree created under $dir."
 		}
 		$i++
 	}
@@ -83,4 +95,4 @@ $query = @"
 	ORDER BY Site_Code
 "@
 $results = Invoke-Sqlcmd -Query $query -ServerInstance spectrum.nacgroup.com -Database Forefront
-New-SharePointFolders -InputDataTable $results -Path ".\Unused sites"
+# New-SharePointFolders -InputDataTable $results -Path ".\Unused sites"
