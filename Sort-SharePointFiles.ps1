@@ -1,4 +1,4 @@
-﻿<## -- Sort-SharePointFiles --
+<## -- Sort-SharePointFiles --
 
 This script moves files from the unsorted directory in the new service library
 to the final location in the service library. It identifies the correct work 
@@ -27,7 +27,7 @@ $DestinationPath = "~\Noyes Air Conditioning\Service - Technicians"
 
 # Pull all file names for GoCanvas reports into a variable. This again assumes the script is run 
 # from a computer synchronized with document library holding unsorted GoCanvas reports.
-$files = Get-ChildItem -Path $SourcePath
+$files = Get-ChildItem -Path $SourcePath -File
 $WorkNumbers = @()
 $WorkSites = @()
 $WorkReports = @()
@@ -49,7 +49,7 @@ ForEach ($f in $files) {
 "@
     $result = Invoke-Sqlcmd -Query $query -ServerInstance "spectrum.nacgroup.com" -Database "Forefront"
     # User the resulting data to get the identifier for the site directory.
-    $SiteCode = $result.Site_Code
+    $SiteCode = $result.Site_Code.Trim()
     # Search for the site directory.
     if (Test-Path "$DestinationPath\*$SiteCode") {
         # If the search is successful save the absolute path of the site directory.
@@ -67,8 +67,8 @@ ForEach ($f in $files) {
                 }
             else {
                 # If no job folder exists create one and move the report.
-                $WorkDescription = $result.Description
-                New-Item -Type Directory -Path "$Path\Quoted projects\" -Name "$WorkNumber - $WorkDescription"
+                $WorkDescription = $result.Description.Trim()
+                New-Item -Type Directory -Path "$Path\Quoted projects\" -Name "$WorkNumber - $WorkDescription" | Out-Null
                 Write-Host "I created a new directory ($WorkNumber - $WorkDescription)"
 		Start-Sleep -Seconds 3
                 Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$WorkNumber*"
