@@ -14,6 +14,7 @@ created before the file is put into place.
 # synchronized.
 $SourcePath = "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)\"
 $DestinationPath = "~\Noyes Air Conditioning\Service - Technicians"
+$CurrentPath = Get-Location
 
 
 # Pull the list of current work orders and job numbers from the Spectrum database.
