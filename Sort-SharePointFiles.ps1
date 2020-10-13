@@ -78,7 +78,7 @@ ForEach ($f in $files) {
 			}
                 }
             }
-        if ($WorkNumber.Length -eq 5) {
+        if ($WorkNumber.Length -lt 10) {
             # Reports with 5-digit job numbers can land in several different directories based on the 
             # report type.
             if ($WorkReport -like "Work Order*") {$ReportDir = "Work order reports"}
@@ -94,7 +94,8 @@ ForEach ($f in $files) {
             }
         else {
             # Error handling if job number isn't 5- or 10-digits long.
-            Write-Host "I can't write $f anywhere."
+            Write-Host "I can't write $f anywhere. I'll move it to the `"Needs review`" directory."
+	    Move-Item "$SourcePath\$f" -Destination "$SourcePath\Needs review"
             }
         }
     }
