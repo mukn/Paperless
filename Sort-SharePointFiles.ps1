@@ -65,7 +65,7 @@ ForEach ($f in $files) {
 			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
 			}
                 }
-            else {
+            elseif {
                 # If no job folder exists create one and move the report.
                 $WorkDescription = $result.Description.Trim()
                 New-Item -Type Directory -Path "$Path\Quoted projects\" -Name "$WorkNumber - $WorkDescription" | Out-Null
@@ -77,6 +77,11 @@ ForEach ($f in $files) {
 			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
 			}
                 }
+	    else {
+          	 # Error handling if job number isn't 5- or 10-digits long.
+                 Write-Host "I can't write $f anywhere. I'll move it to the `"Needs review`" directory."
+	         Move-Item "$SourcePath\$f" -Destination "$SourcePath\Needs review"
+                 }
             }
         if ($WorkNumber.Length -lt 10) {
             # Reports with 5-digit job numbers can land in several different directories based on the 
