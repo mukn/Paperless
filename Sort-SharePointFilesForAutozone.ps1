@@ -1,19 +1,18 @@
-<## -- Sort-SharePointFiles --
+<## -- Sort-SharePointFilesForAutozone --
 
-This script moves files from the unsorted directory in the new service library
-to the final location in the service library. It identifies the correct work 
+This script moves files from the unsorted directory in the service library
+to the final location in the Autozone library. It identifies the correct work 
 number, looks that up against SQL, pulls job information from SQL about that 
 job, and sorts the file with that information.
 
-This script also tests if the files already exist. If not, the file tree is 
-created before the file is put into place.
+This is a modified version of the existing script, Sort-SharePointFiles.
 
 #>
 
 # Declare the standard variables. These assume that the script is run from a computer with the libraries 
 # synchronized.
 $SourcePath = "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)\"
-$DestinationPath = "~\Noyes Air Conditioning\Service - Technicians"
+$DestinationPath = "~\Noyes Air Conditioning\Service - Autozone - Autozone\AutoZone Sites\"
 $CurrentPath = Get-Location
 
 
@@ -28,7 +27,7 @@ $CurrentPath = Get-Location
 
 # Pull all file names for GoCanvas reports into a variable. This again assumes the script is run 
 # from a computer synchronized with document library holding unsorted GoCanvas reports.
-$files = Get-ChildItem -Path $SourcePath -File
+$files = Get-ChildItem -Path $SourcePath -File | Sort-Object -Property LastWriteTime -Descending
 $WorkNumbers = @()
 $WorkSites = @()
 $WorkReports = @()
@@ -51,6 +50,32 @@ ForEach ($f in $files) {
     $result = Invoke-Sqlcmd -Query $query -ServerInstance "spectrum.nacgroup.com" -Database "Forefront"
     # User the resulting data to get the identifier for the site directory.
     $SiteCode = $result.Site_Code.Trim()
+    
+    if ((($WorkSite -eq "Autozone") -or ($WorkSite -eq "Auto Zone")) -and (Test-Path "$DestinationPath\*$SiteCode")) {
+      $Path = Get-ChildItem -Path "$DestinationPath\*$SiteCode"
+      Copy-Item "$SourcePath\$f" -Destination "$Path\"
+      Start-Sleep -Seconds 20
+      if (Test-Path "$Path\$f") {
+        Write-Host "I moved $f to $Path\*$SiteCode."
+        Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
+        }
+      }
+    else {Write-Host "False"}
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+<## -- To be dumped --
+
     # Search for the site directory.
     if (Test-Path "$DestinationPath\*$SiteCode") {
         # If the search is successful save the absolute path of the site directory.
@@ -105,3 +130,5 @@ ForEach ($f in $files) {
             }
         }
     }
+
+##>
