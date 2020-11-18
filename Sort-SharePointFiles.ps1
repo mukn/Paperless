@@ -42,6 +42,9 @@ ForEach ($f in $files) {
     $WorkSites += $WorkSite
     $workReport = $f.Name.Split("-")[2]
     $WorkReports += $WorkReport
+    $fileName = $f.Name.Split(".")[0]
+    $fileExtension = $f.Name.Split(".")[1]
+    $TimeSignature = $fileName.Split("-")[3]
     # Using the work order or job number find the corresponding information from Spectrum.
     $query = @"
         SELECT * 
@@ -49,6 +52,10 @@ ForEach ($f in $files) {
         WHERE Job_Number = '$WorkNumber'
 "@
     $result = Invoke-Sqlcmd -Query $query -ServerInstance "spectrum.nacgroup.com" -Database "Forefront"
+
+    # Rebuild the file name.
+    $fileName = $WorkNumber + "-" + $TimeSignature + "." + $fileExtension
+
     # User the resulting data to get the identifier for the site directory.
     $SiteCode = $result.Site_Code.Trim()
     # Search for the site directory.
@@ -59,20 +66,20 @@ ForEach ($f in $files) {
             # Reports with 10-digit job numbers go directly to the associated job folder.
             if (Test-Path "$Path\Quoted projects\$WorkNumber*") {
 		$ProjectDirName = $(Get-Item -Path "$Path\Quoted projects\$WorkNumber*").Name
-                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$ProjectDirName"
+                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$ProjectDirName\$fileName"
 		Start-Sleep -Seconds 3
 		if (Test-Path "$Path\Quoted projects\$ProjectDirName\$f") {
 			Write-Host "I moved $f to $Path\Quoted projects\$WorkNumber."
 			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
 			}
                 }
-            elseif {
+            elseif ($WorkNumber.Length -lt 10) {
                 # If no job folder exists create one and move the report.
                 $WorkDescription = $result.Description.Trim()
                 New-Item -Type Directory -Path "$Path\Quoted projects\" -Name "$WorkNumber - $WorkDescription" | Out-Null
                 Write-Host "I created a new directory ($WorkNumber - $WorkDescription)"
 		Start-Sleep -Seconds 3
-                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$WorkNumber*"
+                Copy-Item "$SourcePath\$f" -Destination "$Path\Quoted projects\$WorkNumber*\$fileName"
 		if (Test-Path "$Path\Quoted projects\$ProjectDirName\$f") {
 			Write-Host "I moved $f to $Path\Quoted projects\$WorkNumber."
 			Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted"
@@ -94,7 +101,7 @@ ForEach ($f in $files) {
             elseif ($WorkReport -like "Chiller Overhaul*") {$ReportDir = "Scheduled maintenance reports"}
             elseif ($WorkReport -like "Plant Engineering*") {$ReportDir = "Scheduled maintenance reports"}
             else {$ReportDir = "Scheduled maintenance reports"}
-            Copy-Item "$SourcePath\$f" -Destination "$Path\$ReportDir"
+            Copy-Item "$SourcePath\$f" -Destination "$Path\$ReportDir\$fileName"
             if (Test-Path "$Path\$ReportDir\$f") { Move-Item "$SourcePath\$f" -Destination "$SourcePath\Sorted" }
             Write-Host "I moved $f to $Path\$ReportDir."
             }
