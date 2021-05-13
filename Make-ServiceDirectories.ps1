@@ -70,6 +70,7 @@ Function New-SharePointFolders {
 }
 
 ## 
+Set-Location -Path "~\Noyes Air Conditioning\Service - Technicians\"
 # Pull active sites from SQL and save to variable.
 $query = @"
 	SELECT * FROM [dbo].[Z_PAPERLESS_REFERENCE_SITE_MASTER]
