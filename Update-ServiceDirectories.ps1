@@ -11,12 +11,10 @@ necessary.
 # synchronized.
 $PathStatusA = "~\Noyes Air Conditioning\Service - Technicians"
 $PathStatusI = "~\Noyes Air Conditioning\Service - Technicians\Inactive sites"
-$PathStatusU = "~\Noyes Air Conditioning\Service - Technicians\Unused sites"
 $SiteCodes = @()
 $directories = @()
 $directories = Get-ChildItem -Path $PathStatusA
 $directories += Get-ChildItem -Path $PathStatusI
-$directories += Get-ChildItem -Path $PathStatusU
 
 # Begin direcotry processing.
 ForEach ($d in $directories) {
@@ -77,28 +75,6 @@ ForEach ($d in $directories) {
             else {
                 Start-Sleep -Seconds 3
                 New-Item -Type Directory -Name "Daily job site reports" -Path "$PathStatusI\$SiteDir\Quoted projects"
-                }
-            }
-        }
-    elseif ($SiteStatus -match "U") {
-        # For unused sites.
-        if (Test-Path "$PathStatusA\*$SiteCode") { Move-Item -Path "$PathStatusA\*$SiteCode" -Destination "$PathStatusU" }
-        elseif (Test-Path "$PathStatusI\*$SiteCode") { Move-Item -Path "$PathStatusI\*$SiteCode" -Destination "$PathStatusU" }
-        elseif (Test-Path "$PathStatusU\*$SiteCode") { Write-Host "The directory for $SiteCode already exists." }
-        else { # Make-ServiceDirectories.ps1
-            $SiteDir = $result.Site_Name.Trim() + " - " + $result.Site_Code.Trim()
-            Write-Host "Creating directory tree for $SiteDir."
-            New-Item -Type Directory -Name $SiteDir -Path $PathStatusU
-			New-Item -Type Directory -Name "Quoted projects" -Path "$PathStatusU\$SiteDir"
-			New-Item -Type Directory -Name "Scheduled maintenance reports" -Path "$PathStatusU\$SiteDir"
-			New-Item -Type Directory -Name "Service contract" -Path "$PathStatusU\$SiteDir"
-			New-Item -Type Directory -Name "Work order reports" -Path "$PathStatusU\$SiteDir"
-            if (Test-Path "$PathStatusU\$SiteDir\Quoted projects") { 
-                New-Item -Type Directory -Name "Daily job site reports" -Path "$PathStatusU\$SiteDir\Quoted projects"
-                }
-            else {
-                Start-Sleep -Seconds 3
-                New-Item -Type Directory -Name "Daily job site reports" -Path "$PathStatusU\$SiteDir\Quoted projects"
                 }
             }
         }
