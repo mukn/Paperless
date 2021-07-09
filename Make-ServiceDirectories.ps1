@@ -63,6 +63,7 @@ Function New-SharePointFolders {
 			New-Item -Type Directory -Name "Work order reports" -Path $dir | Out-Null
 			New-Item -Type Directory -Name "Daily job site reports" -Path "$dir\Quoted projects" | Out-Null
 			Write-Host "Directory tree created under $dir."
+			Copy-Item -Path "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)\Templates\Job site log.docx" -Destination .\$dir\
 		}
 		$i++
 	}
