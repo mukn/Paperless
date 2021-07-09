@@ -1,4 +1,4 @@
-﻿<## -- Update-ServiceDirectories --
+<## -- Update-ServiceDirectories --
 
 This script reviews each of the directories in the Service - Technicians 
 document library with the intent of moving directories for sites tagged
@@ -37,7 +37,6 @@ ForEach ($d in $directories) {
         # present, move the existing folder, else create a new folder tree.
         if (Test-Path "$PathStatusA\*$SiteCode") { Write-Host "The directory for $SiteCode already exists." }
         elseif (Test-Path "$PathStatusI\*$SiteCode") { Move-Item -Path "$PathStatusI\*$SiteCode" -Destination "$PathStatusA\" }
-        elseif (Test-Path "$PathStatusU\*$SiteCode") { Move-Item -Path "$PathStatusU\*$SiteCode" -Destination "$PathStatusA\" }
         else { 
             # Make-ServiceDirectories.ps1
             $SiteDir = $result.Site_Name.Trim() + " - " + $result.Site_Code.Trim()
@@ -47,6 +46,7 @@ ForEach ($d in $directories) {
 			New-Item -Type Directory -Name "Scheduled maintenance reports" -Path "$PathStatusA\$SiteDir"
 			New-Item -Type Directory -Name "Service contract" -Path "$PathStatusA\$SiteDir"
 			New-Item -Type Directory -Name "Work order reports" -Path "$PathStatusA\$SiteDir"
+            Copy-Item -Path "~\Noyes Air Conditioning\Service - GoCanvas work reports (unsorted)\Templates\Job site log.docx" -Destination .\$dir\
             if (Test-Path "$PathStatusA\$SiteDir\Quoted projects") { 
                 New-Item -Type Directory -Name "Daily job site reports" -Path "$PathStatusA\$SiteDir\Quoted projects"
                 }
@@ -60,7 +60,6 @@ ForEach ($d in $directories) {
         # For inactive sites.
         if (Test-Path "$PathStatusA\*$SiteCode") { Move-Item -Path "$PathStatusA\*$SiteCode" -Destination "$PathStatusI" }
         elseif (Test-Path "$PathStatusI\*$SiteCode") { Write-Host "The directory for $SiteCode already exists." }
-        elseif (Test-Path "$PathStatusU\*$SiteCode") { Move-Item -Path "$PathStatusU\*$SiteCode" -Destination "$PathStatusI" }
         else { # Make-ServiceDirectories.ps1
             $SiteDir = $result.Site_Name.Trim() + " - " + $result.Site_Code.Trim()
             Write-Host "Creating directory tree for $SiteDir."
